@@ -45,7 +45,7 @@ ui <- dashboardPage(
     menuItem("Value Chains", tabName = "vcdashboard", icon = icon("dashboard")),
     menuItem("Wage Employment", tabName = "wedashboard", icon = icon("dashboard")),
     menuItem("Off Farm", tabName = "ofdashboard", icon = icon("dashboard")),
-    menuItem("Other Livelihood Pathways", tabName = "lpdashboard", icon = icon("dashboard"))
+    menuItem("Other Livelihood Trainings", tabName = "lpdashboard", icon = icon("dashboard"))
   )),
   
   ## Body content
@@ -64,7 +64,7 @@ ui <- dashboardPage(
     # First tab content - VESA Saving body
     tabItem(tabName = "vsdashboard",
             fluidPage(
-              titlePanel("VESA Household Saving - Time frame"),
+              titlePanel("VESA Household Saving"),
               
               # Select Quarter or Month 
               dateRangeInput("monthslide", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -86,7 +86,7 @@ ui <- dashboardPage(
     # Second tab content - VESA Loans body
     tabItem(tabName = "vldashboard",
             fluidPage(
-              titlePanel("VESA Household Loan - Time frame"),
+              titlePanel("VESA Household Loan"),
               
               # Select Quarter or Month 
               dateRangeInput("monthslide2", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -107,7 +107,7 @@ ui <- dashboardPage(
     # Third tab content - VESA Training Body
     tabItem(tabName = "vtdashboard",
             fluidPage(
-              titlePanel("VESA Household Training - Time frame"),
+              titlePanel("VESA Household Training"),
               # Select Quarter or Month 
               dateRangeInput("monthslide3", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
                              end = NULL , format = "yyyy-mm-dd", startview = "month", separator = "to", weekstart = 0),
@@ -128,7 +128,7 @@ ui <- dashboardPage(
     # Fourth tab content - VESA Discussions Body
     tabItem(tabName = "vddashboard",
             fluidPage(
-              titlePanel("VESA Household Discussion - Time frame"),
+              titlePanel("VESA Household Discussion"),
               verbatimTextOutput("discussionqtr_filtered_row"),
               # Select Quarter or Month 
               dateRangeInput("monthslide4", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -160,12 +160,6 @@ ui <- dashboardPage(
               dateRangeInput("monthslide5", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
                              end = NULL , format = "yyyy-mm-dd", startview = "month", separator = "to", weekstart = 0),
               selectInput(
-                inputId =  "loantype", 
-                label = "Select FFS", 
-                c("MFI", "RuSACCO"),
-                selected = "MFI"
-              ),
-              selectInput(
                 inputId =  "ffsloan", 
                 label = "Select data", 
                 c("participated", "did not participate"),
@@ -186,10 +180,7 @@ ui <- dashboardPage(
               # Select Quarter or Month 
               dateRangeInput("monthslide6", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
                              end = NULL , format = "yyyy-mm-dd", startview = "month", separator = "to", weekstart = 0),
-              selectInput(
-                inputId =  "savetype", 
-                label = "Select FFS", 
-                c("MFI", "RuSACCO")),
+            
               selectInput(
                 inputId =  "ffssave", 
                 label = "Select data", 
@@ -207,7 +198,7 @@ ui <- dashboardPage(
     # Seventh tab content - Value Chains Body
     tabItem(tabName = "vcdashboard",
             fluidPage(
-              titlePanel("Value Chains - Time frame"),
+              titlePanel("Value Chains"),
               # Select Quarter or Month 
               dateRangeInput("monthslide7", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
                              end = NULL , format = "yyyy-mm-dd", startview = "month", separator = "to", weekstart = 0),
@@ -228,7 +219,7 @@ ui <- dashboardPage(
     #Eigth Tab - Wage Employment
     tabItem(tabName = "wedashboard",
             fluidPage(
-              titlePanel("Wage Employment - Time frame"),
+              titlePanel("Wage Employment"),
               
               # Select Quarter or Month 
               dateRangeInput("monthslide8", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -249,7 +240,7 @@ ui <- dashboardPage(
     #Nineth Tab - Off farm
     tabItem(tabName = "ofdashboard",
             fluidPage(
-              titlePanel("Off farm Activities - Time frame"),
+              titlePanel("Off farm Activities"),
               
               # Select Quarter or Month 
               dateRangeInput("monthslide9", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -270,7 +261,7 @@ ui <- dashboardPage(
     #Tenth Tab - Other Livelihood Pathways
     tabItem(tabName = "lpdashboard",
             fluidPage(
-              titlePanel("Other Livelihood Pathways - Time frame"),
+              titlePanel("Other Livelihood Trainings"),
               
               # Select Quarter or Month 
               dateRangeInput("monthslide10", label = h5("Select Period, i.e monthly, quarterly, etc"), start = NULL, 
@@ -652,184 +643,162 @@ server <- function(input, output, session) {
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
     hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
-    #Gets a list of of VESA, PSNP and loan amount
     
-    #Checks if selected input is MFI or RuSACCO
-    if (input$loantype == "MFI"){
+    ffsloan <- data.frame(Date=as.Date(character()),
+                     File=character(), 
+                     User=character(), 
+                     stringsAsFactors=FALSE) 
+    
+    #Get PSNP data
       if(input$ffsloan == "participated"){
         mfiloan <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/vKKgZNvykzu/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
         
         mfiloan <- read.table(text = mfiloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
         
-        mfiloan <- merge(x = mfiloan, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        mfiloan <- unique(mfiloan)
-        mfiloan <- merge(x = mfiloan, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        ffsloan <- unique(mfiloan)
-      }
-      else
-      {
-        #MFI Loan data
-        mfiloan2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/vKKgZNvykzu/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
+        if(is.data.frame(mfiloan) && nrow(mfiloan)!=0){
+          if (mfiloan$ffs_type == "true"){
+            mfiloan$ffs_type  <- "MFI Loan"
+          }
         
-        mfiloan2 <- read.table(text = mfiloan2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+          # Rename a column in R
+          colnames(mfiloan)[colnames(mfiloan)=="mfi_loan"] <- "loan_amount"
+        }
         
-        mfiloan2 <- merge(x = mfiloan2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        mfiloan2 <- unique(mfiloan2)
-        mfiloan2 <- merge(x = mfiloan2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        mfiloan2 <- unique(mfiloan2)
-        
-        #Removes the unrequired columns/variables vesa_training and report date
-        mfiloan2 <- select(mfiloan2, -mfi_loan)
-        mfiloan2 <- select(mfiloan2, -report_date)
-        
-        #All PSNP numbers
-        allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-        allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        
-        #selects all records PSNP numbers that are not present in the 
-        ffsloan <- subset(allPSNPnumbers, !(psnp_number %in% mfiloan2$psnp_number))
-        
-      }}
-    else {
-      
-      if(input$ffsloan == "participated"){
         rusloan <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/ihfsZtbXZRJ/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
         
         rusloan <- read.table(text = rusloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
         
-        rusloan <- merge(x = rusloan, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        rusloan <- unique(rusloan)
-        rusloan <- merge(x = rusloan, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        ffsloan <- unique(rusloan)
+        if(is.data.frame(rusloan) && nrow(rusloan)!=0){
+          if (rusloan$ffs_type == "true"){
+            rusloan$ffs_type  <- "RuSACCO Loan"
+          }
+          # Rename a column in R
+          colnames(rusloan)[colnames(rusloan)=="rusacco_loan"] <- "loan_amount"
+        
+        #Merge The Three VC tables
+        ffsloan <- mfiloan
+        ffsloan <- merge(x=ffsloan, y = rusloan, by = c("region","zone","woreda","kebele","vesa","psnp_number","report_date","ffs_type", "loan_cycle", "loan_amount"), all.x = TRUE, all.y = TRUE)
+        ffsloan <- unique(ffsloan)
+        
+        ffsloan <- merge(x = ffsloan, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+        ffsloan <- unique(ffsloan)
+        ffsloan <- merge(x = ffsloan, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+        ffsloan <- unique(ffsloan)
+        }
       }
-      else
-      {
-        #RUSACCO Loan data
-        rusloan2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/ihfsZtbXZRJ/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
-        
-        rusloan2 <- read.table(text = rusloan2, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        
-        rusloan2 <- merge(x = rusloan2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        rusloan2 <- unique(rusloan2)
-        rusloan2 <- merge(x = rusloan2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        rusloan2 <- unique(rusloan2)
-        
-        #Removes the unrequired columns/variables vesa_training and report date
-        rusloan2 <- select(rusloan2, -rusacco_loan)
-        rusloan2 <- select(rusloan2, -report_date)
-        
-        #All PSNP numbers
-        allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-        allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        
-        #selects all records PSNP numbers that are not present in the 
-        ffsloan <- subset(allPSNPnumbers, !(psnp_number %in% rusloan2$psnp_number))
-        
-      }
+    else
+    {
+      #FFS Loan data
+      ffsloan2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/MjRQ7cgE29r/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
       
+      ffsloan2 <- read.table(text = ffsloan2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      
+      ffsloan2 <- merge(x = ffsloan2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+      ffsloan2 <- unique(ffsloan2)
+      ffsloan2 <- merge(x = ffsloan2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+      ffsloan2 <- unique(ffsloan2)
+      
+      #Removes the unrequired columns/variables vesa_training and report date
+      ffsloan2 <- select(ffsloan2, -ffs)
+      ffsloan2 <- select(ffsloan2, -report_date)
+      
+      #All PSNP numbers
+      allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
+      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+      allPSNPnumbers <- unique(allPSNPnumbers)
+      allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+      allPSNPnumbers <- unique(allPSNPnumbers)
+      
+      #selects all records PSNP numbers that are not present in the FFS Loan table
+      ffsloan <- subset(allPSNPnumbers, !(psnp_number %in% ffsloan2$psnp_number))
     }
+    
     return(ffsloan)
   })
   
-  #FFS Saving
+  #FFS Loan
   ffsSaveData <- reactive({
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
     hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
-    #Gets a list of of VESA, PSNP and saving amount
     
-    #Checks if selected input is MFI or RuSACCO
-    if (input$savetype == "MFI"){
-      if(input$ffssave == "participated"){
-        mfisave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/eHCvECi4psW/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
-        
-        mfisave <- read.table(text = mfisave, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        
-        mfisave <- merge(x = mfisave, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        mfisave <- unique(mfisave)
-        mfisave <- merge(x = mfisave, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        ffssave <- unique(mfisave)
-      }
-      else
-      {
-        #MFI Saving data
-        mfisave2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/eHCvECi4psW/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
-        
-        mfisave2 <- read.table(text = mfisave2, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        
-        mfisave2 <- merge(x = mfisave2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        mfisave2 <- unique(mfisave2)
-        mfisave2 <- merge(x = mfisave2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        mfisave2 <- unique(mfisave2)
-        
-        #Removes the unrequired columns/variables vesa_training and report date
-        mfisave2 <- select(mfisave2, -saving)
-        mfisave2 <- select(mfisave2, -report_date)
-        
-        #All PSNP numbers
-        allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-        allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        
-        #selects all records PSNP numbers that are not present in the 
-        ffssave <- subset(allPSNPnumbers, !(psnp_number %in% mfisave2$psnp_number))
-        
-      }}
-    else {
+    ffssave <- data.frame(Date=as.Date(character()),
+                          File=character(), 
+                          User=character(), 
+                          stringsAsFactors=FALSE) 
+    
+    #Get PSNP data
+    if(input$ffssave == "participated"){
+      mfisave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/eHCvECi4psW/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
       
-      if(input$ffssave == "participated"){
-        russave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/g2ceaJpudiR/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
-        
-        russave <- read.table(text = russave, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        
-        russave <- merge(x = russave, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        russave <- unique(russave)
-        russave <- merge(x = russave, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        ffssave <- unique(russave)
-      }
-      else
-      {
-        #RUSACCO Saving data
-        russave2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/g2ceaJpudiR/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
-        
-        russave2 <- read.table(text = russave2, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        
-        russave2 <- merge(x = russave2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        russave2 <- unique(russave2)
-        russave2 <- merge(x = russave2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        russave2 <- unique(russave2)
-        
-        #Removes the unrequired columns/variables vesa_training and report date
-        russave2 <- select(russave2, -saving)
-        russave2 <- select(russave2, -report_date)
-        
-        #All PSNP numbers
-        allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-        allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
-        allPSNPnumbers <- unique(allPSNPnumbers)
-        
-        #selects all records PSNP numbers that are not present in the 
-        ffssave <- subset(allPSNPnumbers, !(psnp_number %in% russave2$psnp_number))
-        
-      }
+      mfisave <- read.table(text = mfisave, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
+      if(is.data.frame(mfisave) && nrow(mfisave)!=0){
+        if (mfisave$ffs_type == "true"){
+          mfisave$ffs_type  <- "MFI Saving"
+        }
+        
+        # Rename a column in R
+        colnames(mfisave)[colnames(mfisave)=="saving"] <- "saving_amount"
+        
+      
+      }
+   
+      
+      russave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/g2ceaJpudiR/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
+      
+      russave <- read.table(text = russave, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      
+      if(is.data.frame(russave) && nrow(russave)!=0){
+        if (russave$ffs_type == "true"){
+          russave$ffs_type  <- "RuSACCO Saving"
+        }
+        # Rename a column in R
+        colnames(russave)[colnames(russave)=="saving"] <- "saving_amount"
+        
+        
+        #Merge The Three VC tables
+        ffssave <- mfisave
+        ffssave <- merge(x=ffssave, y = russave, by = c("region","zone","woreda","kebele","vesa","psnp_number","report_date","ffs_type", "saving_amount"), all.x = TRUE, all.y = TRUE)
+        ffssave <- unique(ffssave)
+        
+        ffssave <- merge(x = ffssave, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+        ffssave <- unique(ffssave)
+        ffssave <- merge(x = ffssave, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+        ffssave <- unique(ffssave)
+      }
     }
+    else
+    {
+      #FFS Saving data data
+      ffssave2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/JWNZWu1a12V/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
+      
+      ffssave2 <- read.table(text = ffssave2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      
+      ffssave2 <- merge(x = ffssave2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+      ffssave2 <- unique(ffssave2)
+      ffssave2 <- merge(x = ffssave2, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+      ffssave2 <- unique(ffssave2)
+      
+      #Removes the unrequired columns/variables vesa_training and report date
+      ffssave2 <- select(ffssave2, -ffs)
+      ffssave2 <- select(ffssave2, -report_date)
+      
+      #All PSNP numbers
+      allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
+      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
+      allPSNPnumbers <- unique(allPSNPnumbers)
+      allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
+      allPSNPnumbers <- unique(allPSNPnumbers)
+      
+      #selects all records PSNP numbers that are not present in the FFS Loan table
+      ffssave <- subset(allPSNPnumbers, !(psnp_number %in% ffssave2$psnp_number))
+    }
+    
     return(ffssave)
   })
   
@@ -1431,11 +1400,10 @@ server <- function(input, output, session) {
   
   output$pivot_ffsloan <- renderRpivotTable({
     
-    if(input$loantype == "MFI"){  
       if(input$ffsloan == "participated"){ 
         rpivotTable(ffsloanData(),
                     rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    cols=c("household_type"),width="100%", height="500px", vals = "mfi_loan", aggregatorName = "Sum",
+                    cols=c("ffs_type","household_type"),width="100%", height="500px", vals = "loan_amount", aggregatorName = "Sum",
                     onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData7', 
                                                 document.getElementById('pivot_ffsloan').innerHTML);}"))}
       else{
@@ -1445,22 +1413,6 @@ server <- function(input, output, session) {
                     onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData7', 
                                                 document.getElementById('pivot_ffsloan').innerHTML); 
       }"))
-    }}
-    else{
-      if(input$ffsloan == "participated"){ 
-        rpivotTable(ffsloanData(),
-                    rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    cols=c("household_type"),width="100%", height="500px", vals = "rusacco_loan", aggregatorName = "Sum",
-                    onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData7', 
-                                                document.getElementById('pivot_ffsloan').innerHTML);}"))}
-      else{
-        rpivotTable(ffsloanData(),
-                    rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    width="100%", height="500px", vals = "psnp_number", aggregatorName = "Count Unique Values",
-                    onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData7', 
-                                                document.getElementById('pivot_ffsloan').innerHTML); 
-      }"))
-    }
     }
     
     })
@@ -1485,26 +1437,11 @@ server <- function(input, output, session) {
   
   output$pivot_ffssave <- renderRpivotTable({
     
-    if(input$savetype == "MFI"){  
+     
       if(input$ffssave == "participated"){ 
         rpivotTable(ffsSaveData(),
                     rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    cols=c("household_type"),width="100%", height="500px", vals = "saving", aggregatorName = "Sum",
-                    onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData8', 
-                                                document.getElementById('pivot_ffssave').innerHTML);}"))}
-      else{
-        rpivotTable(ffsSaveData(),
-                    rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    width="100%", height="500px", vals = "psnp_number", aggregatorName = "Count Unique Values",
-                    onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData8', 
-                                                document.getElementById('pivot_ffssave').innerHTML); 
-      }"))
-      }}
-    else{
-      if(input$ffssave == "participated"){ 
-        rpivotTable(ffsSaveData(),
-                    rows=c("region","zone","woreda","kebele","vesa","psnp_number"), 
-                    cols=c("household_type"),width="100%", height="500px", vals = "saving", aggregatorName = "Sum",
+                    cols=c("ffs_type","household_type"),width="100%", height="500px", vals = "saving_amount", aggregatorName = "Sum",
                     onRefresh = htmlwidgets::JS("function(config) {Shiny.onInputChange('myData8', 
                                                 document.getElementById('pivot_ffssave').innerHTML);}"))}
       else{
@@ -1515,7 +1452,6 @@ server <- function(input, output, session) {
                                                 document.getElementById('pivot_ffssave').innerHTML); 
       }"))
       }
-    }
     
     })
   
