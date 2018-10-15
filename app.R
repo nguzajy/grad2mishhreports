@@ -295,7 +295,7 @@ server <- function(input, output, session) {
   
   #Gets Household Graduation status
   hhGraduation <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/Px4p2D1QTty/data.csv"), userpwd=userpass, httpauth = 1L)
-  hhGraduation <- read.table(text = hhGraduation, sep =",", header = TRUE, stringsAsFactors = FALSE)
+  hhGraduation <- read.csv(text = hhGraduation, sep =",", header = TRUE, stringsAsFactors = FALSE)
   
   hhGraduation$graduation_status[hhGraduation$graduation_status == "false"] <- "null"
   hhGraduation$graduation_status[hhGraduation$graduation_status == "true"] <- "Graduated"
@@ -354,17 +354,16 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/RkAOfvnQxTp/data.csv"), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and Saving amount for the year
     
     vesaHH <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/WGO4WfPbJXL/data.csv"), userpwd=userpass, httpauth = 1L)
     
-    vesaHH <- read.table(text = vesaHH, sep =",", header = TRUE, stringsAsFactors = FALSE)
-    
+    vesaHH <- read.csv(text = vesaHH, sep =",", header = TRUE, stringsAsFactors = FALSE)
     vesaHHDropOut <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/TkpDy3nZbKL/data.csv"), userpwd=userpass, httpauth = 1L)
     
-    vesaHHDropOut <- read.table(text = vesaHHDropOut, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    vesaHHDropOut <- read.csv(text = vesaHHDropOut, sep =",", header = TRUE, stringsAsFactors = FALSE)
     vesaHHDropOut$hh_dropout[vesaHHDropOut$hh_dropout == "true"] <- "HH Dropout"
     
     
@@ -382,6 +381,7 @@ server <- function(input, output, session) {
     
     vesaHH <- merge(x = vesaHH, y = hhGraduation, by = "psnp_number", all.x = TRUE)
     vesaHH <- unique(vesaHH)
+    print(vesaHH)
     
     
     return(vesaHH)})
@@ -391,7 +391,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide[1],"&var=period2:",input$monthslide[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     savingAmountQuarter <- data.frame(Date=as.Date(character()),
                                       File=character(), 
@@ -401,7 +401,7 @@ server <- function(input, output, session) {
     #Gets a list of of VESA, PSNP and Saving amt per quarter
     if(input$save2 == "saved"){
       savingAmountQuarter <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/M4a8hSJRXfa/data.csv?var=period1:",input$monthslide[1],"&var=period2:",input$monthslide[2]), userpwd=userpass, httpauth = 1L)
-      savingAmountQuarter <- read.table(text = savingAmountQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      savingAmountQuarter <- read.csv(text = savingAmountQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
       if(is.data.frame(savingAmountQuarter) && nrow(savingAmountQuarter)!=0){
         savingAmountQuarter$beneficiary_status[savingAmountQuarter$beneficiary_status == "MHH"] <- "ADULT"
         savingAmountQuarter$beneficiary_status[savingAmountQuarter$beneficiary_status == "FHH"] <- "ADULT"
@@ -419,7 +419,7 @@ server <- function(input, output, session) {
     else{
       #Saving data
       savingAmountQuarter2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/M4a8hSJRXfa/data.csv?var=period1:",input$monthslide[1],"&var=period2:",input$monthslide[2]), userpwd=userpass, httpauth = 1L)
-      savingAmountQuarter2 <- read.table(text = savingAmountQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      savingAmountQuarter2 <- read.csv(text = savingAmountQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       savingAmountQuarter2 <- merge(x = savingAmountQuarter2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       savingAmountQuarter2 <- unique(savingAmountQuarter2)
@@ -433,7 +433,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -452,7 +452,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide2[1],"&var=period2:",input$monthslide2[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     
     
@@ -460,7 +460,7 @@ server <- function(input, output, session) {
     if(input$loan2 == "received loan"){
       loanAmountQuarter <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/DlTcpawtIC1/data.csv?var=period1:",input$monthslide2[1],"&var=period2:",input$monthslide2[2]), userpwd=userpass, httpauth = 1L)
       
-      loanAmountQuarter <- read.table(text = loanAmountQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      loanAmountQuarter <- read.csv(text = loanAmountQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
       if(is.data.frame(loanAmountQuarter) && nrow(loanAmountQuarter)!=0){
         loanAmountQuarter$beneficiary_status[loanAmountQuarter$beneficiary_status == "MHH"] <- "ADULT"
         loanAmountQuarter$beneficiary_status[loanAmountQuarter$beneficiary_status == "FHH"] <- "ADULT"
@@ -476,7 +476,7 @@ server <- function(input, output, session) {
     else{
       loanAmountQuarter2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/DlTcpawtIC1/data.csv?var=period1:",input$monthslide2[1],"&var=period2:",input$monthslide2[2]), userpwd=userpass, httpauth = 1L)
       
-      loanAmountQuarter2 <- read.table(text = loanAmountQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      loanAmountQuarter2 <- read.csv(text = loanAmountQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       
       loanAmountQuarter2 <- merge(x = loanAmountQuarter2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
@@ -490,7 +490,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -508,14 +508,14 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide3[1],"&var=period2:",input$monthslide3[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and loan amount
     
     if(input$training2 == "participated"){
       trainingQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/I8MTZhh3sR7/data.csv?var=period1:",input$monthslide3[1],"&var=period2:",input$monthslide3[2]), userpwd=userpass, httpauth = 1L)
       
-      trainingQtr <- read.table(text = trainingQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      trainingQtr <- read.csv(text = trainingQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       trainingQtr <- merge(x = trainingQtr, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       trainingQtr <- unique(trainingQtr)
@@ -527,7 +527,7 @@ server <- function(input, output, session) {
       #training data
       trainingQtr2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/I8MTZhh3sR7/data.csv?var=period1:",input$monthslide3[1],"&var=period2:",input$monthslide3[2]), userpwd=userpass, httpauth = 1L)
       
-      trainingQtr2 <- read.table(text = trainingQtr2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      trainingQtr2 <- read.csv(text = trainingQtr2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       trainingQtr2 <- merge(x = trainingQtr2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       trainingQtr2 <- unique(trainingQtr2)
@@ -540,7 +540,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -558,13 +558,13 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide4[1],"&var=period2:",input$monthslide4[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and loan amount
     if(input$discussion2 == "participated"){
       discussionQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/nUrDo1BipCl/data.csv?var=period1:",input$monthslide4[1],"&var=period2:",input$monthslide4[2]), userpwd=userpass, httpauth = 1L)
       
-      discussionQtr <- read.table(text = discussionQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      discussionQtr <- read.csv(text = discussionQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       discussionQtr <- merge(x = discussionQtr, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       discussionQtr <- unique(discussionQtr)
@@ -577,7 +577,7 @@ server <- function(input, output, session) {
       #Discussion data
       discussionQtr2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/nUrDo1BipCl/data.csv?var=period1:",input$monthslide3[1],"&var=period2:",input$monthslide3[2]), userpwd=userpass, httpauth = 1L)
       
-      discussionQtr2 <- read.table(text = discussionQtr2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      discussionQtr2 <- read.csv(text = discussionQtr2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       discussionQtr2 <- merge(x = discussionQtr2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       discussionQtr2 <- unique(discussionQtr2)
@@ -590,7 +590,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -608,7 +608,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide4[1],"&var=period2:",input$monthslide4[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     completedDiscussions <- data.frame(Date=as.Date(character()),
                                        File=character(), 
                                        User=character(), 
@@ -618,7 +618,7 @@ server <- function(input, output, session) {
     if(input$discussion2 == "participated"){
       discussionQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/nUrDo1BipCl/data.csv?var=period1:",input$monthslide4[1],"&var=period2:",input$monthslide4[2]), userpwd=userpass, httpauth = 1L)
       
-      discussionQtr <- read.table(text = discussionQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      discussionQtr <- read.csv(text = discussionQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       discussionQtr <- merge(x = discussionQtr, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       discussionQtr <- unique(discussionQtr)
@@ -641,7 +641,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     
     ffsloan <- data.frame(Date=as.Date(character()),
@@ -653,7 +653,7 @@ server <- function(input, output, session) {
       if(input$ffsloan == "participated"){
         mfiloan <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/vKKgZNvykzu/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
         
-        mfiloan <- read.table(text = mfiloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
+        mfiloan <- read.csv(text = mfiloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
         
         if(is.data.frame(mfiloan) && nrow(mfiloan)!=0){
           if (mfiloan$ffs_type == "true"){
@@ -666,7 +666,7 @@ server <- function(input, output, session) {
         
         rusloan <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/ihfsZtbXZRJ/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
         
-        rusloan <- read.table(text = rusloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
+        rusloan <- read.csv(text = rusloan, sep =",", header = TRUE, stringsAsFactors = FALSE)
         
         if(is.data.frame(rusloan) && nrow(rusloan)!=0){
           if (rusloan$ffs_type == "true"){
@@ -691,7 +691,7 @@ server <- function(input, output, session) {
       #FFS Loan data
       ffsloan2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/MjRQ7cgE29r/data.csv?var=period1:",input$monthslide5[1],"&var=period2:",input$monthslide5[2]), userpwd=userpass, httpauth = 1L)
       
-      ffsloan2 <- read.table(text = ffsloan2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      ffsloan2 <- read.csv(text = ffsloan2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       ffsloan2 <- merge(x = ffsloan2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       ffsloan2 <- unique(ffsloan2)
@@ -704,7 +704,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -722,7 +722,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     
     ffssave <- data.frame(Date=as.Date(character()),
@@ -734,7 +734,7 @@ server <- function(input, output, session) {
     if(input$ffssave == "participated"){
       mfisave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/eHCvECi4psW/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
       
-      mfisave <- read.table(text = mfisave, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      mfisave <- read.csv(text = mfisave, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(mfisave) && nrow(mfisave)!=0){
         if (mfisave$ffs_type == "true"){
@@ -750,7 +750,7 @@ server <- function(input, output, session) {
       
       russave <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/g2ceaJpudiR/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
       
-      russave <- read.table(text = russave, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      russave <- read.csv(text = russave, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(russave) && nrow(russave)!=0){
         if (russave$ffs_type == "true"){
@@ -776,7 +776,7 @@ server <- function(input, output, session) {
       #FFS Saving data data
       ffssave2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/JWNZWu1a12V/data.csv?var=period1:",input$monthslide6[1],"&var=period2:",input$monthslide6[2]), userpwd=userpass, httpauth = 1L)
       
-      ffssave2 <- read.table(text = ffssave2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      ffssave2 <- read.csv(text = ffssave2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       ffssave2 <- merge(x = ffssave2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       ffssave2 <- unique(ffssave2)
@@ -789,7 +789,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -812,7 +812,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide7[1],"&var=period2:",input$monthslide7[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and Value Chain Participation
     
@@ -820,7 +820,7 @@ server <- function(input, output, session) {
       #Fetch VC Complete data
       vcComplete <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/iab9IL26rLm/data.csv?var=period1:",input$monthslide7[1],"&var=period2:",input$monthslide7[2]), userpwd=userpass, httpauth = 1L)
       
-      vcComplete <- read.table(text = vcComplete, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      vcComplete <- read.csv(text = vcComplete, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(vcComplete) && nrow(vcComplete)!=0){
         if (vcComplete$completed_technical_training_curriculum == "true"){
@@ -832,7 +832,7 @@ server <- function(input, output, session) {
       #Fetch VC Business Plan Data
       vcBusiness <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/ino0zDv67lr/data.csv?var=period1:",input$monthslide7[1],"&var=period2:",input$monthslide7[2]), userpwd=userpass, httpauth = 1L)
       
-      vcBusiness <- read.table(text = vcBusiness, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      vcBusiness <- read.csv(text = vcBusiness, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(vcBusiness) && nrow(vcBusiness)!=0){
         if (vcBusiness$business_plan == "true"){
@@ -844,7 +844,7 @@ server <- function(input, output, session) {
       #Fetch VC Participation Data
       vcParticipation <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/p7JxUvZahIu/data.csv?var=period1:",input$monthslide7[1],"&var=period2:",input$monthslide7[2]), userpwd=userpass, httpauth = 1L)
       
-      vcParticipation <- read.table(text = vcParticipation, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      vcParticipation <- read.csv(text = vcParticipation, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(vcParticipation) && nrow(vcParticipation)!=0){
         if (vcParticipation$participation_in_development_discussions == "true"){
@@ -881,7 +881,7 @@ server <- function(input, output, session) {
       #VC data
       vcValueChain <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/kRCFa2S0Aex/data.csv?var=period1:",input$monthslide7[1],"&var=period2:",input$monthslide7[2]), userpwd=userpass, httpauth = 1L)
       
-      vcValueChain <- read.table(text = vcValueChain, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      vcValueChain <- read.csv(text = vcValueChain, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       
       vcValueChain <- merge(x = vcValueChain, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
@@ -895,7 +895,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -913,12 +913,12 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide8[1],"&var=period2:",input$monthslide8[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and Saving amt per quarter
     if(input$wage2 == "linked"){
       WageQuarter <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/NUareAo2fDM/data.csv?var=period1:",input$monthslide8[1],"&var=period2:",input$monthslide8[2]), userpwd=userpass, httpauth = 1L)
-      WageQuarter <- read.table(text = WageQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      WageQuarter <- read.csv(text = WageQuarter, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       WageQuarter <- merge(x = WageQuarter, y = hhTypeQtr, by = "psnp_number", all.x = TRUE)
       WageQuarter <- unique(WageQuarter)
@@ -936,7 +936,7 @@ server <- function(input, output, session) {
     else{
       #Wage data
       WageQuarter2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/NUareAo2fDM/data.csv?var=period1:",input$monthslide8[1],"&var=period2:",input$monthslide8[2]), userpwd=userpass, httpauth = 1L)
-      WageQuarter2 <- read.table(text = WageQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      WageQuarter2 <- read.csv(text = WageQuarter2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       WageQuarter2 <- merge(x = WageQuarter2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       WageQuarter2 <- unique(WageQuarter2)
@@ -951,7 +951,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -976,7 +976,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide9[1],"&var=period2:",input$monthslide9[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list of of VESA, PSNP and Off Farm
     
@@ -984,7 +984,7 @@ server <- function(input, output, session) {
       #Fetch of Microfranchise data
       ofMicrofranchise <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/orcrmI5IsuI/data.csv?var=period1:",input$monthslide9[1],"&var=period2:",input$monthslide9[2]), userpwd=userpass, httpauth = 1L)
       
-      ofMicrofranchise <- read.table(text = ofMicrofranchise, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      ofMicrofranchise <- read.csv(text = ofMicrofranchise, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(ofMicrofranchise) && nrow(ofMicrofranchise)!=0){
         if (ofMicrofranchise$microfranchise == "true"){
@@ -996,7 +996,7 @@ server <- function(input, output, session) {
       #Fetch of BYOB Plan Data
       ofBYOB <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/WZSgy8sBV6o/data.csv?var=period1:",input$monthslide9[1],"&var=period2:",input$monthslide9[2]), userpwd=userpass, httpauth = 1L)
       
-      ofBYOB <- read.table(text = ofBYOB, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      ofBYOB <- read.csv(text = ofBYOB, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(ofBYOB) && nrow(ofBYOB)!=0){
         if (ofBYOB$byob == "true"){
@@ -1008,7 +1008,7 @@ server <- function(input, output, session) {
       #Fetch of Other Data
       ofOther <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/fdsgep1S3ff/data.csv?var=period1:",input$monthslide9[1],"&var=period2:",input$monthslide9[2]), userpwd=userpass, httpauth = 1L)
       
-      ofOther <- read.table(text = ofOther, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      ofOther <- read.csv(text = ofOther, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(ofOther) && nrow(ofOther)!=0){
         if (ofOther$other_off_farm == "true"){
@@ -1045,7 +1045,7 @@ server <- function(input, output, session) {
       #of data
       of2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/JnITxvfuLPz/data.csv?var=period1:",input$monthslide9[1],"&var=period2:",input$monthslide9[2]), userpwd=userpass, httpauth = 1L)
       
-      of2 <- read.table(text = of2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      of2 <- read.csv(text = of2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       of2 <- merge(x = of2, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       of2 <- unique(of2)
@@ -1058,7 +1058,7 @@ server <- function(input, output, session) {
       
       #All PSNP numbers
       allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-      allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
       allPSNPnumbers <- unique(allPSNPnumbers)
       allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
@@ -1081,7 +1081,7 @@ server <- function(input, output, session) {
     
     #Gets HH type information from database
     hhTypeQtr <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/QiPM5jhPlzh/data.csv?var=period1:",input$monthslide10[1],"&var=period2:",input$monthslide10[2]), userpwd=userpass, httpauth = 1L)
-    hhTypeQtr <- read.table(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
+    hhTypeQtr <- read.csv(text = hhTypeQtr, sep =",", header = TRUE, stringsAsFactors = FALSE)
     
     #Gets a list lp lp VESA, PSNP and lpf Farm
     
@@ -1089,7 +1089,7 @@ server <- function(input, output, session) {
       #Fetch lp vocational_training data
       lpVocationalTraining <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/IuLuk4Ls5FC/data.csv?var=period1:",input$monthslide10[1],"&var=period2:",input$monthslide10[2]), userpwd=userpass, httpauth = 1L)
       
-      lpVocationalTraining <- read.table(text = lpVocationalTraining, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      lpVocationalTraining <- read.csv(text = lpVocationalTraining, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(lpVocationalTraining) && nrow(lpVocationalTraining)!=0){
         if (lpVocationalTraining$vocational_training == "true"){
@@ -1101,7 +1101,7 @@ server <- function(input, output, session) {
       #Fetch lp wrn Plan Data
       lpWRN <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/iYiaYENmSCp/data.csv?var=period1:",input$monthslide10[1],"&var=period2:",input$monthslide10[2]), userpwd=userpass, httpauth = 1L)
       
-      lpWRN <- read.table(text = lpWRN, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      lpWRN <- read.csv(text = lpWRN, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(lpWRN) && nrow(lpWRN)!=0){
         if (lpWRN$wrn == "true"){
@@ -1136,7 +1136,7 @@ server <- function(input, output, session) {
       #Fetch lp vocational_training data
       lpVocationalTraining2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/IuLuk4Ls5FC/data.csv?var=period1:",input$monthslide10[1],"&var=period2:",input$monthslide10[2]), userpwd=userpass, httpauth = 1L)
       
-      lpVocationalTraining2 <- read.table(text = lpVocationalTraining2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      lpVocationalTraining2 <- read.csv(text = lpVocationalTraining2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(lpVocationalTraining2) && nrow(lpVocationalTraining2)!=0){
         if (lpVocationalTraining2$vocational_training == "true"){
@@ -1148,7 +1148,7 @@ server <- function(input, output, session) {
       #Fetch lp wrn Plan Data
       lpWRN2 <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/iYiaYENmSCp/data.csv?var=period1:",input$monthslide10[1],"&var=period2:",input$monthslide10[2]), userpwd=userpass, httpauth = 1L)
       
-      lpWRN2 <- read.table(text = lpWRN2, sep =",", header = TRUE, stringsAsFactors = FALSE)
+      lpWRN2 <- read.csv(text = lpWRN2, sep =",", header = TRUE, stringsAsFactors = FALSE)
       
       if(is.data.frame(lpWRN2) && nrow(lpWRN2)!=0){
         if (lpWRN2$wrn == "true"){
@@ -1182,7 +1182,7 @@ server <- function(input, output, session) {
         
         #All PSNP numbers
         allPSNPnumbers <- getURL(paste0("https://dev.grad2mis.com/api/26/sqlViews/oWQYVUf32Ma/data.csv"), userpwd=userpass, httpauth = 1L)
-        allPSNPnumbers <- read.table(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
+        allPSNPnumbers <- read.csv(text = allPSNPnumbers, sep =",", header = TRUE, stringsAsFactors = FALSE)
         allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhTypeQtr, by = "psnp_number", all.x =TRUE)
         allPSNPnumbers <- unique(allPSNPnumbers)
         allPSNPnumbers <- merge(x = allPSNPnumbers, y = hhGraduation, by = "psnp_number", all.x =TRUE)
